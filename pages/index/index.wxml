@@ -1,0 +1,40 @@
+<!--pages/index/index.wxml 首页-->
+<view class="container">
+
+  <!-- 顶部总金额卡片 -->
+  <view class="header-card">
+    <text class="header-label">家庭总支出（本月）</text>
+    <text class="header-amount">¥{{totalAmount}}</text>
+    <view class="member-row">
+      <view class="member-item" wx:for="{{memberSummary}}" wx:key="name">
+        <text class="member-name">{{item.name}}</text>
+        <text class="member-amount">¥{{item.amount}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 账单列表 -->
+  <view class="bill-list">
+    <view class="bill-title">最近账单</view>
+    <view class="bill-item" wx:for="{{bills}}" wx:key="_id">
+      <view class="bill-left">
+        <view class="bill-category tag {{item.tagClass}}">{{item.category}}</view>
+        <text class="bill-note">{{item.note || '无备注'}}</text>
+      </view>
+      <view class="bill-right">
+        <text class="bill-amount">-¥{{item.amount}}</text>
+        <text class="bill-spender">{{item.spender}} · {{item.dateStr}}</text>
+      </view>
+    </view>
+    <view wx:if="{{bills.length === 0}}" class="empty-tip">
+      <text>还没有账单，快去记一笔吧~</text>
+    </view>
+  </view>
+
+  <!-- 底部按钮 -->
+  <view class="bottom-bar">
+    <button class="btn-bottom btn-stats" bindtap="goStats">📊 统计</button>
+    <button class="btn-bottom btn-add" bindtap="goAdd">+ 记一笔</button>
+  </view>
+
+</view>

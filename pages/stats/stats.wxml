@@ -1,0 +1,36 @@
+<!--pages/stats/stats.wxml 统计-->
+<view class="container">
+
+  <!-- 月度切换 -->
+  <view class="month-bar">
+    <text class="month-arrow" bindtap="prevMonth">‹</text>
+    <text class="month-text">{{year}}年{{month}}月</text>
+    <text class="month-arrow" bindtap="nextMonth">›</text>
+  </view>
+
+  <!-- 总金额 -->
+  <view class="total-card">
+    <text class="total-label">本月支出</text>
+    <text class="total-amount">¥{{totalAmount}}</text>
+  </view>
+
+  <!-- 饼图区域 -->
+  <view class="chart-card" wx:if="{{categoryData.length > 0}}">
+    <canvas type="2d" id="pieChart" class="pie-canvas"></canvas>
+    <!-- 图例 -->
+    <view class="legend-list">
+      <view class="legend-item" wx:for="{{categoryData}}" wx:key="name">
+        <view class="legend-dot" style="background: {{item.color}}"></view>
+        <text class="legend-name">{{item.name}}</text>
+        <text class="legend-pct">{{item.percent}}%</text>
+        <text class="legend-amount">¥{{item.amount}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{categoryData.length === 0}}" class="empty-tip">
+    <text>本月还没有支出记录</text>
+  </view>
+
+</view>

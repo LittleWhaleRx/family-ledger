@@ -1,0 +1,60 @@
+<!--pages/add/add.wxml 记一笔-->
+<view class="container">
+
+  <!-- 金额输入 -->
+  <view class="card amount-card">
+    <text class="label">金额</text>
+    <view class="amount-input-row">
+      <text class="currency">¥</text>
+      <input class="amount-input" 
+             type="digit" 
+             placeholder="0.00" 
+             value="{{amount}}" 
+             bindinput="onAmountInput"
+             focus="{{true}}"
+             placeholder-class="placeholder" />
+    </view>
+  </view>
+
+  <!-- 类别选择 -->
+  <view class="card">
+    <text class="label">类别</text>
+    <view class="category-grid">
+      <view class="cat-item {{category === item ? 'cat-active' : ''}}"
+            wx:for="{{categories}}" wx:key="*this"
+            bindtap="selectCategory" data-cat="{{item}}">
+        <text>{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 付款人 -->
+  <view class="card">
+    <text class="label">谁花的</text>
+    <view class="spender-row">
+      <view class="spender-item {{spender === item ? 'spender-active' : ''}}"
+            wx:for="{{familyMembers}}" wx:key="*this"
+            bindtap="selectSpender" data-name="{{item}}">
+        <text>{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 备注（触发自动分类） -->
+  <view class="card">
+    <text class="label">备注 <text class="hint">（写清楚买了什么，会自动识别类别）</text></text>
+    <input class="note-input" 
+           placeholder="比如：猪肉、牛奶、地铁票..."
+           value="{{note}}"
+           bindinput="onNoteInput"
+           bindblur="onNoteBlur" />
+  </view>
+
+  <!-- 提交按钮 -->
+  <view class="submit-area">
+    <button class="btn-submit" bindtap="submitBill" disabled="{{submitting}}">
+      {{submitting ? '提交中...' : '✓ 记下这笔'}}
+    </button>
+  </view>
+
+</view>
