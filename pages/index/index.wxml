@@ -18,15 +18,6 @@
     <view class="bill-title">最近账单</view>
     <view class="bill-swipe-item" wx:for="{{bills}}" wx:key="_id">
       <view
-        class="bill-delete-action"
-        data-id="{{item._id}}"
-        data-note="{{item.note}}"
-        data-amount="{{item.amount}}"
-        catchtap="deleteBill"
-      >
-        <text>删除</text>
-      </view>
-      <view
         class="bill-item {{swipedBillId === item._id ? 'bill-item-open' : ''}}"
         data-id="{{item._id}}"
         bindtouchstart="onBillTouchStart"
@@ -42,9 +33,18 @@
           <text class="bill-spender">{{item.spender}} · {{item.dateStr}}</text>
         </view>
       </view>
+      <view
+        class="bill-delete-action"
+        data-id="{{item._id}}"
+        data-note="{{item.note}}"
+        data-amount="{{item.amount}}"
+        catchtap="deleteBill"
+      >
+        <text>删除</text>
+      </view>
     </view>
     <view class="delete-hint" wx:if="{{bills.length > 0}}">
-      <text>向右滑动账单可删除</text>
+      <text>向左滑动账单可删除</text>
     </view>
     <view wx:if="{{bills.length === 0}}" class="empty-tip">
       <text>还没有账单，快去记一笔吧~</text>

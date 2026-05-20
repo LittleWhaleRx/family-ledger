@@ -78,12 +78,12 @@
 }
 
 .bill-item-open {
-  transform: translateX(128rpx);
+  transform: translateX(-128rpx);
 }
 
 .bill-delete-action {
   position: absolute;
-  left: 0;
+  right: 0;
   top: 0;
   bottom: 0;
   width: 128rpx;

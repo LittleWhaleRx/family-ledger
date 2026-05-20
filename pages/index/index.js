@@ -118,9 +118,9 @@ Page({
 
     if (Math.abs(deltaY) > Math.abs(deltaX)) return
 
-    if (deltaX > 45) {
+    if (deltaX < -45) {
       this.setData({ swipedBillId: id })
-    } else if (deltaX < -30) {
+    } else if (deltaX > 30) {
       this.setData({ swipedBillId: '' })
     }
   },
