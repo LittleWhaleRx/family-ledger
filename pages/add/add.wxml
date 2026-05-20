@@ -12,6 +12,8 @@
              value="{{amount}}" 
              bindinput="onAmountInput"
              focus="{{true}}"
+             cursor-spacing="160"
+             adjust-position="{{true}}"
              placeholder-class="placeholder" />
     </view>
   </view>
