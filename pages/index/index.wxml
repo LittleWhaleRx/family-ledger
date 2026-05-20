@@ -7,6 +7,7 @@
     <text class="header-amount">¥{{totalAmount}}</text>
     <view class="member-row">
       <view class="member-item" wx:for="{{memberSummary}}" wx:key="name">
+        <text class="member-icon">{{item.icon}}</text>
         <text class="member-name">{{item.name}}</text>
         <text class="member-amount">¥{{item.amount}}</text>
       </view>
@@ -30,7 +31,7 @@
         </view>
         <view class="bill-right">
           <text class="bill-amount">-¥{{item.amount}}</text>
-          <text class="bill-spender">{{item.spender}} · {{item.dateStr}}</text>
+          <text class="bill-spender">{{item.spenderIcon}} {{item.spender}} · {{item.dateStr}}</text>
         </view>
       </view>
       <view

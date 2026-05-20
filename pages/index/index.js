@@ -49,6 +49,7 @@ Page({
       const bills = res.data.map(b => ({
         ...b,
         dateStr: this.formatDate(b.createdAt),
+        spenderIcon: (app.globalData.memberIcons || {})[b.spender] || '👤',
         tagClass: 'tag-' + (tagClassMap[b.category] || 'other')
       }))
 
@@ -63,6 +64,7 @@ Page({
       })
       const memberSummary = (app.globalData.familyMembers || []).map(name => ({
         name,
+        icon: (app.globalData.memberIcons || {})[name] || '👤',
         amount: (members[name] || 0).toFixed(2)
       }))
 

@@ -34,10 +34,11 @@
   <view class="card">
     <text class="label">谁花的</text>
     <view class="spender-row">
-      <view class="spender-item {{spender === item ? 'spender-active' : ''}}"
-            wx:for="{{familyMembers}}" wx:key="*this"
-            bindtap="selectSpender" data-name="{{item}}">
-        <text>{{item}}</text>
+      <view class="spender-item {{spender === item.name ? 'spender-active' : ''}}"
+            wx:for="{{familyMembers}}" wx:key="name"
+            bindtap="selectSpender" data-name="{{item.name}}">
+        <text class="member-icon">{{item.icon}}</text>
+        <text>{{item.name}}</text>
       </view>
     </view>
   </view>

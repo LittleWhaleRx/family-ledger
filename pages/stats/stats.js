@@ -118,6 +118,7 @@ Page({
 
           return {
             name,
+            icon: (app.globalData.memberIcons || {})[name] || '👤',
             amount: item.amount.toFixed(2),
             count: item.count,
             percent: totalAmount > 0 ? Math.round(item.amount / totalAmount * 100) : 0,

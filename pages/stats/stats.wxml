@@ -19,7 +19,10 @@
     <view class="section-title">成员支出</view>
     <view class="member-stat" wx:for="{{memberData}}" wx:key="name">
       <view class="member-header">
-        <text class="member-name">{{item.name}}</text>
+        <view class="member-title">
+          <text class="member-icon">{{item.icon}}</text>
+          <text class="member-name">{{item.name}}</text>
+        </view>
         <text class="member-amount">¥{{item.amount}}</text>
       </view>
       <view class="member-meta">

@@ -14,7 +14,12 @@ Page({
   },
 
   onLoad() {
-    this.setData({ familyMembers: app.globalData.familyMembers })
+    const memberIcons = app.globalData.memberIcons || {}
+    const familyMembers = (app.globalData.familyMembers || []).map(name => ({
+      name,
+      icon: memberIcons[name] || '👤'
+    }))
+    this.setData({ familyMembers })
   },
 
   onAmountInput(e) {

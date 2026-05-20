@@ -35,6 +35,17 @@
   text-align: center;
 }
 
+.member-icon {
+  display: block;
+  width: 52rpx;
+  height: 52rpx;
+  line-height: 52rpx;
+  margin: 0 auto 8rpx;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  font-size: 30rpx;
+}
+
 .member-name {
   font-size: 24rpx;
   opacity: 0.8;
