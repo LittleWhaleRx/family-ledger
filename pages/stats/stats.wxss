@@ -48,6 +48,70 @@
   color: #fff;
 }
 
+.section-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 22rpx;
+}
+
+/* 成员统计 */
+.member-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+}
+
+.member-stat {
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.member-stat:last-child {
+  border-bottom: none;
+}
+
+.member-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10rpx;
+}
+
+.member-name {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.member-amount {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #e74c3c;
+}
+
+.member-meta {
+  display: flex;
+  justify-content: space-between;
+  color: #888;
+  font-size: 22rpx;
+  margin-bottom: 14rpx;
+}
+
+.member-progress {
+  height: 12rpx;
+  background: #f0f0f0;
+  border-radius: 6rpx;
+  overflow: hidden;
+}
+
+.member-progress-fill {
+  height: 100%;
+  background: #07c160;
+  border-radius: 6rpx;
+}
+
 /* 图表卡片 */
 .chart-card {
   background: #fff;

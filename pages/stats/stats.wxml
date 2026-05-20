@@ -14,8 +14,28 @@
     <text class="total-amount">¥{{totalAmount}}</text>
   </view>
 
+  <!-- 成员统计 -->
+  <view class="member-card" wx:if="{{memberData.length > 0}}">
+    <view class="section-title">成员支出</view>
+    <view class="member-stat" wx:for="{{memberData}}" wx:key="name">
+      <view class="member-header">
+        <text class="member-name">{{item.name}}</text>
+        <text class="member-amount">¥{{item.amount}}</text>
+      </view>
+      <view class="member-meta">
+        <text>{{item.count}}笔</text>
+        <text>占比 {{item.percent}}%</text>
+        <text>均笔 ¥{{item.avgAmount}}</text>
+      </view>
+      <view class="member-progress">
+        <view class="member-progress-fill" style="width: {{item.percent}}%"></view>
+      </view>
+    </view>
+  </view>
+
   <!-- 饼图区域 -->
   <view class="chart-card" wx:if="{{categoryData.length > 0}}">
+    <view class="section-title">类别支出</view>
     <canvas type="2d" id="pieChart" class="pie-canvas"></canvas>
     <!-- 图例 -->
     <view class="legend-list">

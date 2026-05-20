@@ -1,4 +1,5 @@
 // pages/stats/stats.js
+const app = getApp()
 const db = wx.cloud.database()
 const _ = db.command
 
@@ -19,7 +20,8 @@ Page({
     year: 2024,
     month: 1,
     totalAmount: '0.00',
-    categoryData: []
+    categoryData: [],
+    memberData: []
   },
 
   onLoad() {
@@ -80,7 +82,37 @@ Page({
         }))
         .sort((a, b) => b.amount - a.amount)
 
-      this.setData({ totalAmount: totalAmount.toFixed(2), categoryData }, () => {
+      // 按家庭成员汇总
+      const memberMap = {}
+      bills.forEach(b => {
+        const spender = b.spender || '未填写'
+        if (!memberMap[spender]) {
+          memberMap[spender] = {
+            name: spender,
+            amount: 0,
+            count: 0
+          }
+        }
+        memberMap[spender].amount += b.amount
+        memberMap[spender].count += 1
+      })
+
+      const familyMembers = app.globalData.familyMembers || []
+      const extraMembers = Object.keys(memberMap).filter(name => !familyMembers.includes(name))
+      const memberData = familyMembers.concat(extraMembers)
+        .map(name => {
+          const item = memberMap[name] || { amount: 0, count: 0 }
+          return {
+            name,
+            amount: item.amount.toFixed(2),
+            count: item.count,
+            percent: totalAmount > 0 ? Math.round(item.amount / totalAmount * 100) : 0,
+            avgAmount: item.count > 0 ? (item.amount / item.count).toFixed(2) : '0.00'
+          }
+        })
+        .filter(item => item.count > 0 || familyMembers.includes(item.name))
+
+      this.setData({ totalAmount: totalAmount.toFixed(2), categoryData, memberData }, () => {
         if (categoryData.length > 0) this.drawPieChart()
       })
     } catch (err) {
