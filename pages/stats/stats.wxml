@@ -30,6 +30,21 @@
       <view class="member-progress">
         <view class="member-progress-fill" style="width: {{item.percent}}%"></view>
       </view>
+      <view class="member-structure" wx:if="{{item.categories.length > 0}}">
+        <canvas
+          type="2d"
+          class="member-pie-canvas"
+          data-member-index="{{index}}"
+        ></canvas>
+        <view class="member-category-list">
+          <view class="member-category-item" wx:for="{{item.categories}}" wx:for-item="cat" wx:key="name">
+            <view class="member-category-dot" style="background: {{cat.color}}"></view>
+            <text class="member-category-name">{{cat.name}}</text>
+            <text class="member-category-pct">{{cat.percent}}%</text>
+            <text class="member-category-amount">¥{{cat.amount}}</text>
+          </view>
+        </view>
+      </view>
     </view>
   </view>
 

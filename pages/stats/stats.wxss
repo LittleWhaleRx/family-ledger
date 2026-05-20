@@ -112,6 +112,57 @@
   border-radius: 6rpx;
 }
 
+.member-structure {
+  display: flex;
+  align-items: center;
+  gap: 22rpx;
+  margin-top: 22rpx;
+}
+
+.member-pie-canvas {
+  width: 220rpx;
+  height: 220rpx;
+  flex-shrink: 0;
+}
+
+.member-category-list {
+  flex: 1;
+  min-width: 0;
+}
+
+.member-category-item {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 0;
+}
+
+.member-category-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.member-category-name {
+  flex: 1;
+  min-width: 0;
+  color: #333;
+  font-size: 24rpx;
+}
+
+.member-category-pct {
+  color: #999;
+  font-size: 22rpx;
+  margin-right: 12rpx;
+}
+
+.member-category-amount {
+  color: #e74c3c;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
 /* 图表卡片 */
 .chart-card {
   background: #fff;

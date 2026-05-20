@@ -76,6 +76,7 @@ Page({
       const categoryData = Object.entries(catMap)
         .map(([name, amount]) => ({
           name,
+          amountValue: amount,
           amount: amount.toFixed(2),
           percent: totalAmount > 0 ? Math.round(amount / totalAmount * 100) : 0,
           color: CAT_COLORS[name] || '#95a5a6'
@@ -90,30 +91,45 @@ Page({
           memberMap[spender] = {
             name: spender,
             amount: 0,
-            count: 0
+            count: 0,
+            categories: {}
           }
         }
         memberMap[spender].amount += b.amount
         memberMap[spender].count += 1
+        if (!memberMap[spender].categories[b.category]) memberMap[spender].categories[b.category] = 0
+        memberMap[spender].categories[b.category] += b.amount
       })
 
       const familyMembers = app.globalData.familyMembers || []
       const extraMembers = Object.keys(memberMap).filter(name => !familyMembers.includes(name))
       const memberData = familyMembers.concat(extraMembers)
         .map(name => {
-          const item = memberMap[name] || { amount: 0, count: 0 }
+          const item = memberMap[name] || { amount: 0, count: 0, categories: {} }
+          const categories = Object.entries(item.categories)
+            .map(([catName, amount]) => ({
+              name: catName,
+              amountValue: amount,
+              amount: amount.toFixed(2),
+              percent: item.amount > 0 ? Math.round(amount / item.amount * 100) : 0,
+              color: CAT_COLORS[catName] || '#95a5a6'
+            }))
+            .sort((a, b) => b.amountValue - a.amountValue)
+
           return {
             name,
             amount: item.amount.toFixed(2),
             count: item.count,
             percent: totalAmount > 0 ? Math.round(item.amount / totalAmount * 100) : 0,
-            avgAmount: item.count > 0 ? (item.amount / item.count).toFixed(2) : '0.00'
+            avgAmount: item.count > 0 ? (item.amount / item.count).toFixed(2) : '0.00',
+            categories
           }
         })
         .filter(item => item.count > 0 || familyMembers.includes(item.name))
 
       this.setData({ totalAmount: totalAmount.toFixed(2), categoryData, memberData }, () => {
         if (categoryData.length > 0) this.drawPieChart()
+        this.drawMemberPieCharts()
       })
     } catch (err) {
       console.error('加载统计失败', err)
@@ -176,6 +192,63 @@ Page({
         ctx.fillStyle = '#999'
         ctx.font = '20px sans-serif'
         ctx.fillText(this.data.year + '年' + this.data.month + '月', cx, cy + 20)
+      })
+  },
+
+  drawMemberPieCharts() {
+    const query = wx.createSelectorQuery()
+    query.selectAll('.member-pie-canvas')
+      .fields({ node: true, size: true, dataset: true })
+      .exec((res) => {
+        const canvases = res && res[0]
+        if (!canvases || canvases.length === 0) return
+
+        const dpr = wx.getSystemInfoSync().pixelRatio
+        canvases.forEach(item => {
+          const memberIndex = Number(item.dataset.memberIndex)
+          const member = this.data.memberData[memberIndex]
+          if (!member || !member.categories || member.categories.length === 0) return
+
+          const canvas = item.node
+          const ctx = canvas.getContext('2d')
+          const size = 220
+          canvas.width = size * dpr
+          canvas.height = size * dpr
+          ctx.scale(dpr, dpr)
+          ctx.clearRect(0, 0, size, size)
+
+          const cx = size / 2
+          const cy = size / 2
+          const r = 78
+          let startAngle = -Math.PI / 2
+          const total = member.categories.reduce((sum, cat) => sum + cat.amountValue, 0)
+
+          member.categories.forEach(cat => {
+            const sweepAngle = total > 0 ? (cat.amountValue / total) * Math.PI * 2 : 0
+            ctx.beginPath()
+            ctx.moveTo(cx, cy)
+            ctx.arc(cx, cy, r, startAngle, startAngle + sweepAngle)
+            ctx.closePath()
+            ctx.fillStyle = cat.color
+            ctx.fill()
+            startAngle += sweepAngle
+          })
+
+          ctx.beginPath()
+          ctx.arc(cx, cy, 42, 0, Math.PI * 2)
+          ctx.fillStyle = '#fff'
+          ctx.fill()
+
+          ctx.fillStyle = '#333'
+          ctx.font = 'bold 22px sans-serif'
+          ctx.textAlign = 'center'
+          ctx.textBaseline = 'middle'
+          ctx.fillText(member.percent + '%', cx, cy - 8)
+
+          ctx.fillStyle = '#999'
+          ctx.font = '16px sans-serif'
+          ctx.fillText('总占比', cx, cy + 18)
+        })
       })
   }
 })
