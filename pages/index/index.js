@@ -141,7 +141,10 @@ Page({
       confirmText: '删除',
       confirmColor: '#e74c3c',
       success: async (res) => {
-        if (!res.confirm) return
+        if (!res.confirm) {
+          this.setData({ swipedBillId: '' })
+          return
+        }
 
         wx.showLoading({ title: '删除中...' })
         try {
