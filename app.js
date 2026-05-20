@@ -14,6 +14,7 @@ App({
       envId: 'cloud1-d1guy5yz64698e80b',
       // 家庭成员可选
       familyMembers: ['家庭', '爸爸', '妈妈', '儿子'],
+      operatorMembers: ['爸爸', '妈妈', '儿子'],
       memberIcons: {
         '家庭': '🏡',
         '爸爸': '🧔',
@@ -29,7 +30,94 @@ App({
         '娱乐': ['电影', '游戏', 'k歌', '唱歌', '旅游', '门票', '健身房', '游泳', '篮球', '足球', 'steam', 'switch', 'ps5', '音乐', '会员', '视频', '追剧'],
         '医疗': ['药', '医院', '挂号', '看病', '体检', '牙科', '眼科', '感冒', '发烧', '咳嗽', '手术', '医保'],
         '教育': ['学费', '书本', '补习', '培训', '课程', '考试', '报名', '辅导', '网课', '兴趣班', '文具', '学费']
-      }
+      },
+      openid: '',
+      currentUser: null
     }
+  },
+
+  getMemberIcon(name) {
+    return (this.globalData.memberIcons || {})[name] || '👤'
+  },
+
+  getOperatorOptions() {
+    return (this.globalData.operatorMembers || []).map(name => ({
+      name,
+      icon: this.getMemberIcon(name)
+    }))
+  },
+
+  async getOpenid() {
+    if (this.globalData.openid) return this.globalData.openid
+
+    const res = await wx.cloud.callFunction({ name: 'getOpenid' })
+    const openid = res.result && res.result.openid
+    this.globalData.openid = openid || ''
+    return this.globalData.openid
+  },
+
+  async loadCurrentUser(force = false) {
+    if (this.globalData.currentUser && !force) return this.globalData.currentUser
+
+    const openid = await this.getOpenid()
+    if (!openid) return null
+
+    const db = wx.cloud.database()
+    const res = await db.collection('users')
+      .where({ openid })
+      .limit(1)
+      .get()
+
+    const user = res.data && res.data[0]
+    this.globalData.currentUser = user || null
+    return this.globalData.currentUser
+  },
+
+  async bindCurrentUser(memberName) {
+    const allowedMembers = this.globalData.operatorMembers || []
+    if (!allowedMembers.includes(memberName)) {
+      throw new Error('无效的使用者')
+    }
+
+    const openid = await this.getOpenid()
+    if (!openid) throw new Error('获取用户身份失败')
+
+    const db = wx.cloud.database()
+    const user = {
+      openid,
+      memberName,
+      icon: this.getMemberIcon(memberName),
+      updatedAt: new Date()
+    }
+
+    const res = await db.collection('users')
+      .where({ openid })
+      .limit(1)
+      .get()
+
+    if (res.data && res.data[0]) {
+      await db.collection('users').doc(res.data[0]._id).update({
+        data: {
+          memberName: user.memberName,
+          icon: user.icon,
+          updatedAt: user.updatedAt
+        }
+      })
+      user._id = res.data[0]._id
+    } else {
+      const addRes = await db.collection('users').add({
+        data: {
+          openid: user.openid,
+          memberName: user.memberName,
+          icon: user.icon,
+          createdAt: new Date(),
+          updatedAt: user.updatedAt
+        }
+      })
+      user._id = addRes._id
+    }
+
+    this.globalData.currentUser = user
+    return user
   }
 })

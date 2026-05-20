@@ -10,10 +10,14 @@ Page({
     bills: [],
     swipedBillId: '',
     touchStartX: 0,
-    touchStartY: 0
+    touchStartY: 0,
+    currentUser: null,
+    operatorOptions: [],
+    showIdentityModal: false
   },
 
-  onShow() {
+  async onShow() {
+    await this.initCurrentUser()
     this.loadData()
   },
 
@@ -51,6 +55,8 @@ Page({
         spender: b.spender || '未填写',
         dateStr: this.formatDate(b.createdAt),
         spenderIcon: (app.globalData.memberIcons || {})[b.spender] || '👤',
+        createdByName: b.createdByName || '未记录',
+        createdByIcon: b.createdByIcon || '👤',
         tagClass: 'tag-' + (tagClassMap[b.category] || 'other')
       }))
 
@@ -82,6 +88,41 @@ Page({
       // 显示具体错误，方便排查
       const errMsg = err.errMsg || err.message || '未知错误'
       wx.showToast({ title: '加载失败: ' + errMsg, icon: 'none', duration: 3000 })
+    } finally {
+      wx.hideLoading()
+    }
+  },
+
+  async initCurrentUser() {
+    try {
+      const currentUser = await app.loadCurrentUser()
+      this.setData({
+        currentUser,
+        operatorOptions: app.getOperatorOptions(),
+        showIdentityModal: !currentUser
+      })
+    } catch (err) {
+      console.error('获取使用者失败', err)
+      this.setData({
+        operatorOptions: app.getOperatorOptions(),
+        showIdentityModal: true
+      })
+    }
+  },
+
+  async selectIdentity(e) {
+    const { name } = e.currentTarget.dataset
+    wx.showLoading({ title: '绑定中...' })
+    try {
+      const currentUser = await app.bindCurrentUser(name)
+      this.setData({
+        currentUser,
+        showIdentityModal: false
+      })
+      wx.showToast({ title: '已绑定' + name, icon: 'success' })
+    } catch (err) {
+      console.error('绑定使用者失败', err)
+      wx.showToast({ title: '绑定失败，请重试', icon: 'none' })
     } finally {
       wx.hideLoading()
     }
@@ -153,7 +194,21 @@ Page({
 
         wx.showLoading({ title: '删除中...' })
         try {
+          const currentUser = await app.loadCurrentUser()
+          const billRes = await db.collection('bills').doc(id).get()
+          const bill = billRes.data || {}
           await db.collection('bills').doc(id).remove()
+          await db.collection('operationLogs').add({
+            data: {
+              action: 'delete',
+              billId: id,
+              billSnapshot: bill,
+              operatorOpenid: currentUser ? currentUser.openid : '',
+              operatorName: currentUser ? currentUser.memberName : '未绑定',
+              operatorIcon: currentUser ? currentUser.icon : '👤',
+              createdAt: new Date()
+            }
+          })
           wx.showToast({ title: '已删除', icon: 'success' })
           this.setData({ swipedBillId: '' })
           this.loadData()

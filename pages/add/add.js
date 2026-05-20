@@ -20,6 +20,9 @@ Page({
       icon: memberIcons[name] || '👤'
     }))
     this.setData({ familyMembers })
+    app.loadCurrentUser().catch(err => {
+      console.error('获取使用者失败', err)
+    })
   },
 
   onAmountInput(e) {
@@ -104,12 +107,36 @@ Page({
     this.setData({ submitting: true })
 
     try {
-      await db.collection('bills').add({
+      const currentUser = await app.loadCurrentUser()
+      if (!currentUser) {
+        wx.showToast({ title: '请先在首页选择使用者', icon: 'none' })
+        this.setData({ submitting: false })
+        return
+      }
+
+      const billData = {
+        amount: parseFloat(amount),
+        category,
+        spender,
+        note: note.trim(),
+        createdByOpenid: currentUser.openid,
+        createdByName: currentUser.memberName,
+        createdByIcon: currentUser.icon,
+        createdAt: new Date()
+      }
+
+      const addRes = await db.collection('bills').add({
+        data: billData
+      })
+
+      await db.collection('operationLogs').add({
         data: {
-          amount: parseFloat(amount),
-          category,
-          spender,
-          note: note.trim(),
+          action: 'add',
+          billId: addRes._id,
+          billSnapshot: billData,
+          operatorOpenid: currentUser.openid,
+          operatorName: currentUser.memberName,
+          operatorIcon: currentUser.icon,
           createdAt: new Date()
         }
       })

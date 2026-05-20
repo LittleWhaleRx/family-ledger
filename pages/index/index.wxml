@@ -3,6 +3,9 @@
 
   <!-- 顶部总金额卡片 -->
   <view class="header-card">
+    <view class="current-user" wx:if="{{currentUser}}">
+      <text>{{currentUser.icon}} 当前记录人：{{currentUser.memberName}}</text>
+    </view>
     <text class="header-label">家庭总支出（本月）</text>
     <text class="header-amount">¥{{totalAmount}}</text>
     <view class="member-row">
@@ -33,6 +36,7 @@
         <view class="bill-right">
           <text class="bill-amount">-¥{{item.amount}}</text>
           <text class="bill-spender">{{item.spenderIcon}} {{item.spender}} · {{item.dateStr}}</text>
+          <text class="bill-creator">{{item.createdByIcon}} {{item.createdByName}} 添加</text>
         </view>
       </view>
       <view
@@ -57,6 +61,25 @@
   <view class="bottom-bar">
     <button class="btn-bottom btn-stats" bindtap="goStats">📊 统计</button>
     <button class="btn-bottom btn-add" bindtap="goAdd">+ 记一笔</button>
+  </view>
+
+  <view class="identity-mask" wx:if="{{showIdentityModal}}">
+    <view class="identity-panel">
+      <text class="identity-title">选择使用者</text>
+      <text class="identity-desc">首次使用需要绑定身份，之后会自动记录是谁添加了账单。</text>
+      <view class="identity-options">
+        <view
+          class="identity-option"
+          wx:for="{{operatorOptions}}"
+          wx:key="name"
+          data-name="{{item.name}}"
+          bindtap="selectIdentity"
+        >
+          <text class="identity-icon">{{item.icon}}</text>
+          <text>{{item.name}}</text>
+        </view>
+      </view>
+    </view>
   </view>
 
 </view>
