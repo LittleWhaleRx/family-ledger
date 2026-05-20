@@ -243,6 +243,18 @@
   color: #e74c3c;
 }
 
+.member-right {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.member-arrow {
+  color: #aaa;
+  font-size: 26rpx;
+  margin-left: 10rpx;
+}
+
 .member-meta {
   display: flex;
   justify-content: space-between;

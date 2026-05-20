@@ -25,7 +25,8 @@ Page({
     annualTotalAmount: '0.00',
     annualMonthData: [],
     annualLeastMember: null,
-    showAnnualDetails: false
+    showAnnualDetails: false,
+    expandedMemberName: ''
   },
 
   onLoad() {
@@ -138,7 +139,8 @@ Page({
             count: item.count,
             percent: totalAmount > 0 ? Math.round(item.amount / totalAmount * 100) : 0,
             avgAmount: item.count > 0 ? (item.amount / item.count).toFixed(2) : '0.00',
-            categories
+            categories,
+            expanded: this.data.expandedMemberName === name
           }
         })
         .filter(item => item.count > 0 || familyMembers.includes(item.name))
@@ -239,6 +241,19 @@ Page({
   },
 
   noop() {},
+
+  toggleMemberDetails(e) {
+    const { name } = e.currentTarget.dataset
+    const expandedMemberName = this.data.expandedMemberName === name ? '' : name
+    const memberData = this.data.memberData.map(item => ({
+      ...item,
+      expanded: item.name === expandedMemberName
+    }))
+
+    this.setData({ expandedMemberName, memberData }, () => {
+      if (expandedMemberName) this.drawMemberPieCharts()
+    })
+  },
 
   drawPieChart() {
     const query = wx.createSelectorQuery()
