@@ -7,7 +7,10 @@ Page({
   data: {
     totalAmount: '0.00',
     memberSummary: [],
-    bills: []
+    bills: [],
+    swipedBillId: '',
+    touchStartX: 0,
+    touchStartY: 0
   },
 
   onShow() {
@@ -66,7 +69,8 @@ Page({
       this.setData({
         totalAmount: totalAmount.toFixed(2),
         memberSummary,
-        bills
+        bills,
+        swipedBillId: ''
       })
     } catch (err) {
       console.error('加载失败', err)
@@ -94,6 +98,39 @@ Page({
     wx.navigateTo({ url: '/pages/stats/stats' })
   },
 
+  onBillTouchStart(e) {
+    const touch = e.touches && e.touches[0]
+    if (!touch) return
+
+    this.setData({
+      touchStartX: touch.clientX,
+      touchStartY: touch.clientY
+    })
+  },
+
+  onBillTouchEnd(e) {
+    const touch = e.changedTouches && e.changedTouches[0]
+    if (!touch) return
+
+    const { id } = e.currentTarget.dataset
+    const deltaX = touch.clientX - this.data.touchStartX
+    const deltaY = touch.clientY - this.data.touchStartY
+
+    if (Math.abs(deltaY) > Math.abs(deltaX)) return
+
+    if (deltaX > 45) {
+      this.setData({ swipedBillId: id })
+    } else if (deltaX < -30) {
+      this.setData({ swipedBillId: '' })
+    }
+  },
+
+  closeSwipe() {
+    if (this.data.swipedBillId) {
+      this.setData({ swipedBillId: '' })
+    }
+  },
+
   deleteBill(e) {
     const { id, note, amount } = e.currentTarget.dataset
     if (!id) return
@@ -110,6 +147,7 @@ Page({
         try {
           await db.collection('bills').doc(id).remove()
           wx.showToast({ title: '已删除', icon: 'success' })
+          this.setData({ swipedBillId: '' })
           this.loadData()
         } catch (err) {
           console.error('删除失败', err)
