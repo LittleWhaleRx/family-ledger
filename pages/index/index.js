@@ -92,5 +92,32 @@ Page({
 
   goStats() {
     wx.navigateTo({ url: '/pages/stats/stats' })
+  },
+
+  deleteBill(e) {
+    const { id, note, amount } = e.currentTarget.dataset
+    if (!id) return
+
+    wx.showModal({
+      title: '删除账单',
+      content: `确定删除「${note || '无备注'}」这笔 ¥${amount} 的账单吗？`,
+      confirmText: '删除',
+      confirmColor: '#e74c3c',
+      success: async (res) => {
+        if (!res.confirm) return
+
+        wx.showLoading({ title: '删除中...' })
+        try {
+          await db.collection('bills').doc(id).remove()
+          wx.showToast({ title: '已删除', icon: 'success' })
+          this.loadData()
+        } catch (err) {
+          console.error('删除失败', err)
+          wx.showToast({ title: '删除失败，请重试', icon: 'none' })
+        } finally {
+          wx.hideLoading()
+        }
+      }
+    })
   }
 })

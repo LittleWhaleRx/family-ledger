@@ -24,6 +24,14 @@
       <view class="bill-right">
         <text class="bill-amount">-¥{{item.amount}}</text>
         <text class="bill-spender">{{item.spender}} · {{item.dateStr}}</text>
+        <button
+          class="bill-delete"
+          size="mini"
+          data-id="{{item._id}}"
+          data-note="{{item.note}}"
+          data-amount="{{item.amount}}"
+          catchtap="deleteBill"
+        >删除</button>
       </view>
     </view>
     <view wx:if="{{bills.length === 0}}" class="empty-tip">

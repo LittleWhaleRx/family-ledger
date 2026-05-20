@@ -88,6 +88,9 @@
 
 .bill-right {
   text-align: right;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
 }
 
 .bill-amount {
@@ -101,6 +104,23 @@
   font-size: 22rpx;
   color: #999;
   margin-top: 4rpx;
+}
+
+.bill-delete {
+  margin: 12rpx 0 0;
+  padding: 0 18rpx;
+  min-width: 0;
+  height: 44rpx;
+  line-height: 44rpx;
+  border-radius: 22rpx;
+  background: #fff;
+  color: #e74c3c;
+  border: 1rpx solid #f0b7af;
+  font-size: 22rpx;
+}
+
+.bill-delete::after {
+  border: none;
 }
 
 /* 各类别标签颜色 */
