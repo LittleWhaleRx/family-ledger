@@ -195,18 +195,18 @@ Page({
         wx.showLoading({ title: '删除中...' })
         try {
           const currentUser = await app.loadCurrentUser()
-          const billRes = await db.collection('bills').doc(id).get()
-          const bill = billRes.data || {}
-          await db.collection('bills').doc(id).remove()
-          app.addOperationLog({
-            action: 'delete',
-            billId: id,
-            billSnapshot: bill,
-            operatorOpenid: currentUser ? currentUser.openid : '',
-            operatorName: currentUser ? currentUser.memberName : '未绑定',
-            operatorIcon: currentUser ? currentUser.icon : '👤',
-            createdAt: new Date()
+          const deleteRes = await wx.cloud.callFunction({
+            name: 'deleteBill',
+            data: {
+              billId: id,
+              operatorName: currentUser ? currentUser.memberName : '未绑定',
+              operatorIcon: currentUser ? currentUser.icon : '👤'
+            }
           })
+          const result = deleteRes.result || {}
+          if (!result.success) {
+            throw new Error(result.message || '删除失败')
+          }
           wx.showToast({ title: '已删除', icon: 'success' })
           this.setData({ swipedBillId: '' })
           this.loadData()
