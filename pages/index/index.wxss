@@ -56,6 +56,14 @@
 .member-amount {
   font-size: 32rpx;
   font-weight: bold;
+  display: block;
+  margin-bottom: 2rpx;
+}
+
+.member-percent {
+  display: block;
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.62);
 }
 
 /* 账单列表 */

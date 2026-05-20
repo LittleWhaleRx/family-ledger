@@ -65,7 +65,8 @@ Page({
       const memberSummary = (app.globalData.familyMembers || []).map(name => ({
         name,
         icon: (app.globalData.memberIcons || {})[name] || '👤',
-        amount: (members[name] || 0).toFixed(2)
+        amount: (members[name] || 0).toFixed(2),
+        percent: totalAmount > 0 ? Math.round((members[name] || 0) / totalAmount * 100) : 0
       }))
 
       this.setData({

@@ -10,6 +10,7 @@
         <text class="member-icon">{{item.icon}}</text>
         <text class="member-name">{{item.name}}</text>
         <text class="member-amount">¥{{item.amount}}</text>
+        <text class="member-percent">{{item.percent}}%</text>
       </view>
     </view>
   </view>
