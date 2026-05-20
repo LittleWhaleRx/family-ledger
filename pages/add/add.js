@@ -129,16 +129,14 @@ Page({
         data: billData
       })
 
-      await db.collection('operationLogs').add({
-        data: {
-          action: 'add',
-          billId: addRes._id,
-          billSnapshot: billData,
-          operatorOpenid: currentUser.openid,
-          operatorName: currentUser.memberName,
-          operatorIcon: currentUser.icon,
-          createdAt: new Date()
-        }
+      app.addOperationLog({
+        action: 'add',
+        billId: addRes._id,
+        billSnapshot: billData,
+        operatorOpenid: currentUser.openid,
+        operatorName: currentUser.memberName,
+        operatorIcon: currentUser.icon,
+        createdAt: new Date()
       })
 
       wx.showToast({ title: '记好了~', icon: 'success' })

@@ -50,26 +50,31 @@ App({
   async getOpenid() {
     if (this.globalData.openid) return this.globalData.openid
 
-    const res = await wx.cloud.callFunction({ name: 'getOpenid' })
-    const openid = res.result && res.result.openid
-    this.globalData.openid = openid || ''
+    try {
+      const res = await wx.cloud.callFunction({ name: 'getOpenid' })
+      const openid = res.result && res.result.openid
+      this.globalData.openid = openid || ''
+    } catch (err) {
+      console.error('获取 openid 失败', err)
+      this.globalData.openid = ''
+    }
     return this.globalData.openid
   },
 
   async loadCurrentUser(force = false) {
     if (this.globalData.currentUser && !force) return this.globalData.currentUser
 
+    const storedUser = wx.getStorageSync('familyLedgerCurrentUser')
+    if (!storedUser || !storedUser.memberName) {
+      this.globalData.currentUser = null
+      return null
+    }
+
     const openid = await this.getOpenid()
-    if (!openid) return null
-
-    const db = wx.cloud.database()
-    const res = await db.collection('users')
-      .where({ openid })
-      .limit(1)
-      .get()
-
-    const user = res.data && res.data[0]
-    this.globalData.currentUser = user || null
+    this.globalData.currentUser = {
+      ...storedUser,
+      openid
+    }
     return this.globalData.currentUser
   },
 
@@ -80,9 +85,6 @@ App({
     }
 
     const openid = await this.getOpenid()
-    if (!openid) throw new Error('获取用户身份失败')
-
-    const db = wx.cloud.database()
     const user = {
       openid,
       memberName,
@@ -90,34 +92,17 @@ App({
       updatedAt: new Date()
     }
 
-    const res = await db.collection('users')
-      .where({ openid })
-      .limit(1)
-      .get()
-
-    if (res.data && res.data[0]) {
-      await db.collection('users').doc(res.data[0]._id).update({
-        data: {
-          memberName: user.memberName,
-          icon: user.icon,
-          updatedAt: user.updatedAt
-        }
-      })
-      user._id = res.data[0]._id
-    } else {
-      const addRes = await db.collection('users').add({
-        data: {
-          openid: user.openid,
-          memberName: user.memberName,
-          icon: user.icon,
-          createdAt: new Date(),
-          updatedAt: user.updatedAt
-        }
-      })
-      user._id = addRes._id
-    }
-
+    wx.setStorageSync('familyLedgerCurrentUser', user)
     this.globalData.currentUser = user
     return user
+  },
+
+  async addOperationLog(data) {
+    try {
+      const db = wx.cloud.database()
+      await db.collection('operationLogs').add({ data })
+    } catch (err) {
+      console.warn('记录操作日志失败', err)
+    }
   }
 })

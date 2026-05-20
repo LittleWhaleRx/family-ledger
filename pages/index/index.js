@@ -198,16 +198,14 @@ Page({
           const billRes = await db.collection('bills').doc(id).get()
           const bill = billRes.data || {}
           await db.collection('bills').doc(id).remove()
-          await db.collection('operationLogs').add({
-            data: {
-              action: 'delete',
-              billId: id,
-              billSnapshot: bill,
-              operatorOpenid: currentUser ? currentUser.openid : '',
-              operatorName: currentUser ? currentUser.memberName : '未绑定',
-              operatorIcon: currentUser ? currentUser.icon : '👤',
-              createdAt: new Date()
-            }
+          app.addOperationLog({
+            action: 'delete',
+            billId: id,
+            billSnapshot: bill,
+            operatorOpenid: currentUser ? currentUser.openid : '',
+            operatorName: currentUser ? currentUser.memberName : '未绑定',
+            operatorIcon: currentUser ? currentUser.icon : '👤',
+            createdAt: new Date()
           })
           wx.showToast({ title: '已删除', icon: 'success' })
           this.setData({ swipedBillId: '' })
