@@ -24,7 +24,8 @@ Page({
     memberData: [],
     annualTotalAmount: '0.00',
     annualMonthData: [],
-    annualLeastMember: null
+    annualLeastMember: null,
+    showAnnualDetails: false
   },
 
   onLoad() {
@@ -100,7 +101,7 @@ Page({
       // 按家庭成员汇总
       const memberMap = {}
       bills.forEach(b => {
-        const spender = b.spender || '未填写'
+        const spender = this.normalizeMemberName(b.spender)
         if (!memberMap[spender]) {
           memberMap[spender] = {
             name: spender,
@@ -178,7 +179,7 @@ Page({
       const date = new Date(b.createdAt)
       const monthIndex = date.getMonth()
       const amount = Number(b.amount) || 0
-      const spender = b.spender || '未填写'
+      const spender = this.normalizeMemberName(b.spender)
 
       monthData[monthIndex].amountValue += amount
       if (spender !== '家庭' && personalMembers.includes(spender)) {
@@ -194,7 +195,7 @@ Page({
 
       bills.forEach(b => {
         const date = new Date(b.createdAt)
-        const spender = b.spender || '未填写'
+        const spender = this.normalizeMemberName(b.spender)
         if (date.getMonth() === item.month - 1 && spender !== '家庭' && personalMembers.includes(spender)) {
           monthMemberAmounts[spender] += Number(b.amount) || 0
         }
@@ -231,6 +232,16 @@ Page({
       if (!leastName) return name
       return amountMap[name] < amountMap[leastName] ? name : leastName
     }, '')
+  },
+
+  normalizeMemberName(name) {
+    const memberName = name || '未填写'
+    const aliases = app.globalData.memberAliases || {}
+    return aliases[memberName] || memberName
+  },
+
+  toggleAnnualDetails() {
+    this.setData({ showAnnualDetails: !this.data.showAnnualDetails })
   },
 
   drawPieChart() {

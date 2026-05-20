@@ -48,8 +48,9 @@ Page({
       }
       const bills = res.data.map(b => ({
         ...b,
+        spender: this.normalizeMemberName(b.spender),
         dateStr: this.formatDate(b.createdAt),
-        spenderIcon: (app.globalData.memberIcons || {})[b.spender] || '👤',
+        spenderIcon: (app.globalData.memberIcons || {})[this.normalizeMemberName(b.spender)] || '👤',
         tagClass: 'tag-' + (tagClassMap[b.category] || 'other')
       }))
 
@@ -59,8 +60,9 @@ Page({
       // 按成员计算
       const members = {}
       bills.forEach(b => {
-        if (!members[b.spender]) members[b.spender] = 0
-        members[b.spender] += b.amount
+        const spender = this.normalizeMemberName(b.spender)
+        if (!members[spender]) members[spender] = 0
+        members[spender] += b.amount
       })
       const memberSummary = (app.globalData.familyMembers || []).map(name => ({
         name,
@@ -91,6 +93,12 @@ Page({
     const M = d.getMonth() + 1
     const D = d.getDate()
     return M + '月' + D + '日'
+  },
+
+  normalizeMemberName(name) {
+    const memberName = name || '未填写'
+    const aliases = app.globalData.memberAliases || {}
+    return aliases[memberName] || memberName
   },
 
   goAdd() {

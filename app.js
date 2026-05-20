@@ -13,12 +13,16 @@ App({
     this.globalData = {
       envId: 'cloud1-d1guy5yz64698e80b',
       // 家庭成员可选
-      familyMembers: ['家庭', '爸爸', '妈妈', '孩子'],
+      familyMembers: ['家庭', '爸爸', '妈妈', '儿子'],
+      memberAliases: {
+        '孩子': '儿子'
+      },
       memberIcons: {
-        '家庭': '🏠',
-        '爸爸': '👨',
-        '妈妈': '👩',
-        '孩子': '🧒'
+        '家庭': '🏡',
+        '爸爸': '🧔',
+        '妈妈': '👩‍🦰',
+        '儿子': '👦',
+        '孩子': '👦'
       },
       // 支出类别及自动识别关键词
       categories: {
