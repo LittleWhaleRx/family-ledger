@@ -238,6 +238,8 @@ Page({
     this.setData({ showAnnualDetails: !this.data.showAnnualDetails })
   },
 
+  noop() {},
+
   drawPieChart() {
     const query = wx.createSelectorQuery()
     query.select('#pieChart')

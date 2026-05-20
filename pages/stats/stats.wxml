@@ -72,8 +72,11 @@
   </view>
 
   <!-- 全年统计 -->
-  <view class="annual-card">
-    <view class="section-title">{{year}}年统计</view>
+  <view class="annual-card" bindtap="toggleAnnualDetails">
+    <view class="annual-title-row">
+      <view class="section-title annual-title">{{year}}年统计</view>
+      <text class="annual-title-arrow">{{showAnnualDetails ? '⌃' : '⌄'}}</text>
+    </view>
     <view class="annual-summary">
       <view>
         <text class="annual-label">全年支出</text>
@@ -86,12 +89,7 @@
       </view>
     </view>
 
-    <view class="annual-toggle" bindtap="toggleAnnualDetails">
-      <text>{{showAnnualDetails ? '收起月份明细' : '查看月份明细'}}</text>
-      <text class="annual-toggle-arrow">{{showAnnualDetails ? '⌃' : '⌄'}}</text>
-    </view>
-
-    <view class="annual-month-list" wx:if="{{showAnnualDetails}}">
+    <view class="annual-month-list" wx:if="{{showAnnualDetails}}" catchtap="noop">
       <view class="annual-month-item" wx:for="{{annualMonthData}}" wx:key="month">
         <view class="annual-month-header">
           <text class="annual-month-name">{{item.month}}月</text>
