@@ -14,6 +14,40 @@
     <text class="total-amount">¥{{totalAmount}}</text>
   </view>
 
+  <!-- 全年统计 -->
+  <view class="annual-card">
+    <view class="section-title">{{year}}年统计</view>
+    <view class="annual-summary">
+      <view>
+        <text class="annual-label">全年支出</text>
+        <text class="annual-amount">¥{{annualTotalAmount}}</text>
+      </view>
+      <view class="annual-trophy" wx:if="{{annualLeastMember}}">
+        <text class="annual-trophy-icon">🏆</text>
+        <text class="annual-trophy-name">{{annualLeastMember.icon}} {{annualLeastMember.name}}</text>
+        <text class="annual-trophy-note">全年最低 ¥{{annualLeastMember.amount}}</text>
+      </view>
+    </view>
+
+    <view class="annual-month-list">
+      <view class="annual-month-item" wx:for="{{annualMonthData}}" wx:key="month">
+        <view class="annual-month-header">
+          <text class="annual-month-name">{{item.month}}月</text>
+          <view class="annual-month-main">
+            <text class="annual-month-amount">¥{{item.amount}}</text>
+            <text class="annual-month-percent">{{item.percent}}%</text>
+          </view>
+        </view>
+        <view class="annual-month-progress">
+          <view class="annual-month-progress-fill" style="width: {{item.percent}}%"></view>
+        </view>
+        <view class="annual-month-trophy" wx:if="{{item.leastMember}}">
+          <text>🏆 {{item.leastMember.icon}} {{item.leastMember.name}} 本月最低 ¥{{item.leastMember.amount}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
   <!-- 成员统计 -->
   <view class="member-card" wx:if="{{memberData.length > 0}}">
     <view class="section-title">成员支出</view>

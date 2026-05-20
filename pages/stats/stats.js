@@ -21,7 +21,10 @@ Page({
     month: 1,
     totalAmount: '0.00',
     categoryData: [],
-    memberData: []
+    memberData: [],
+    annualTotalAmount: '0.00',
+    annualMonthData: [],
+    annualLeastMember: null
   },
 
   onLoad() {
@@ -56,14 +59,25 @@ Page({
       const { year, month } = this.data
       const startDate = new Date(year, month - 1, 1)
       const endDate = new Date(year, month, 0, 23, 59, 59)
+      const yearStartDate = new Date(year, 0, 1)
+      const yearEndDate = new Date(year, 11, 31, 23, 59, 59)
 
       const res = await db.collection('bills')
         .where({
           createdAt: _.gte(startDate).and(_.lte(endDate))
         })
+        .limit(1000)
+        .get()
+
+      const annualRes = await db.collection('bills')
+        .where({
+          createdAt: _.gte(yearStartDate).and(_.lte(yearEndDate))
+        })
+        .limit(1000)
         .get()
 
       const bills = res.data
+      const annualStats = this.buildAnnualStats(annualRes.data)
       const totalAmount = bills.reduce((s, b) => s + b.amount, 0)
 
       // 按类别汇总
@@ -128,7 +142,14 @@ Page({
         })
         .filter(item => item.count > 0 || familyMembers.includes(item.name))
 
-      this.setData({ totalAmount: totalAmount.toFixed(2), categoryData, memberData }, () => {
+      this.setData({
+        totalAmount: totalAmount.toFixed(2),
+        categoryData,
+        memberData,
+        annualTotalAmount: annualStats.totalAmount,
+        annualMonthData: annualStats.monthData,
+        annualLeastMember: annualStats.leastMember
+      }, () => {
         if (categoryData.length > 0) this.drawPieChart()
         this.drawMemberPieCharts()
       })
@@ -138,6 +159,78 @@ Page({
     } finally {
       wx.hideLoading()
     }
+  },
+
+  buildAnnualStats(bills) {
+    const memberIcons = app.globalData.memberIcons || {}
+    const personalMembers = (app.globalData.familyMembers || []).filter(name => name !== '家庭')
+    const monthData = Array.from({ length: 12 }, (_, index) => ({
+      month: index + 1,
+      amountValue: 0,
+      amount: '0.00',
+      percent: 0,
+      leastMember: null
+    }))
+    const annualMemberAmounts = {}
+    personalMembers.forEach(name => { annualMemberAmounts[name] = 0 })
+
+    bills.forEach(b => {
+      const date = new Date(b.createdAt)
+      const monthIndex = date.getMonth()
+      const amount = Number(b.amount) || 0
+      const spender = b.spender || '未填写'
+
+      monthData[monthIndex].amountValue += amount
+      if (spender !== '家庭' && personalMembers.includes(spender)) {
+        annualMemberAmounts[spender] += amount
+      }
+    })
+
+    const total = monthData.reduce((sum, item) => sum + item.amountValue, 0)
+
+    monthData.forEach(item => {
+      const monthMemberAmounts = {}
+      personalMembers.forEach(name => { monthMemberAmounts[name] = 0 })
+
+      bills.forEach(b => {
+        const date = new Date(b.createdAt)
+        const spender = b.spender || '未填写'
+        if (date.getMonth() === item.month - 1 && spender !== '家庭' && personalMembers.includes(spender)) {
+          monthMemberAmounts[spender] += Number(b.amount) || 0
+        }
+      })
+
+      const personalTotal = personalMembers.reduce((sum, name) => sum + monthMemberAmounts[name], 0)
+      const leastName = personalTotal > 0 ? this.getLeastMemberName(monthMemberAmounts, personalMembers) : ''
+
+      item.amount = item.amountValue.toFixed(2)
+      item.percent = total > 0 ? Math.round(item.amountValue / total * 100) : 0
+      item.leastMember = leastName ? {
+        name: leastName,
+        icon: memberIcons[leastName] || '👤',
+        amount: monthMemberAmounts[leastName].toFixed(2)
+      } : null
+    })
+
+    const annualPersonalTotal = personalMembers.reduce((sum, name) => sum + annualMemberAmounts[name], 0)
+    const annualLeastName = annualPersonalTotal > 0 ? this.getLeastMemberName(annualMemberAmounts, personalMembers) : ''
+
+    return {
+      totalAmount: total.toFixed(2),
+      monthData,
+      leastMember: annualLeastName ? {
+        name: annualLeastName,
+        icon: memberIcons[annualLeastName] || '👤',
+        amount: annualMemberAmounts[annualLeastName].toFixed(2)
+      } : null
+    }
+  },
+
+  getLeastMemberName(amountMap, memberNames) {
+    return memberNames.reduce((leastName, name) => {
+      if (!leastName) return name
+      return amountMap[name] < amountMap[leastName] ? name : leastName
+    }, '')
   },
 
   drawPieChart() {

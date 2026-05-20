@@ -55,6 +55,124 @@
   margin-bottom: 22rpx;
 }
 
+/* 全年统计 */
+.annual-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+}
+
+.annual-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  padding-bottom: 24rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.annual-label {
+  display: block;
+  color: #888;
+  font-size: 24rpx;
+  margin-bottom: 6rpx;
+}
+
+.annual-amount {
+  display: block;
+  color: #333;
+  font-size: 42rpx;
+  font-weight: bold;
+}
+
+.annual-trophy {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.annual-trophy-icon {
+  display: block;
+  font-size: 48rpx;
+  line-height: 56rpx;
+}
+
+.annual-trophy-name {
+  display: block;
+  color: #333;
+  font-size: 26rpx;
+  font-weight: bold;
+}
+
+.annual-trophy-note {
+  display: block;
+  color: #999;
+  font-size: 22rpx;
+  margin-top: 4rpx;
+}
+
+.annual-month-list {
+  margin-top: 16rpx;
+}
+
+.annual-month-item {
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid #f7f7f7;
+}
+
+.annual-month-item:last-child {
+  border-bottom: none;
+}
+
+.annual-month-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10rpx;
+}
+
+.annual-month-name {
+  color: #333;
+  font-size: 26rpx;
+  font-weight: bold;
+}
+
+.annual-month-main {
+  display: flex;
+  align-items: baseline;
+  gap: 14rpx;
+}
+
+.annual-month-amount {
+  color: #e74c3c;
+  font-size: 26rpx;
+  font-weight: bold;
+}
+
+.annual-month-percent {
+  color: #aaa;
+  font-size: 22rpx;
+}
+
+.annual-month-progress {
+  height: 10rpx;
+  background: #f0f0f0;
+  border-radius: 5rpx;
+  overflow: hidden;
+}
+
+.annual-month-progress-fill {
+  height: 100%;
+  background: #8bd8ae;
+  border-radius: 5rpx;
+}
+
+.annual-month-trophy {
+  color: #999;
+  font-size: 22rpx;
+  margin-top: 8rpx;
+}
+
 /* 成员统计 */
 .member-card {
   background: #fff;
