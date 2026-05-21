@@ -56,15 +56,17 @@ Page({
         '住房': 'housing', '娱乐': 'entertain', '医疗': 'medical',
         '教育': 'education', '其他': 'other'
       }
-      const bills = res.data.map(b => ({
-        ...b,
-        spender: b.spender || '未填写',
-        dateStr: this.formatDate(b.createdAt),
-        spenderIcon: (app.globalData.memberIcons || {})[b.spender] || '👤',
-        createdByName: b.createdByName || '未记录',
-        createdByIcon: b.createdByIcon || '👤',
-        tagClass: 'tag-' + (tagClassMap[b.category] || 'other')
-      }))
+      const bills = res.data
+        .map(b => ({
+          ...b,
+          spender: b.spender || '未填写',
+          dateStr: this.formatDate(b.createdAt),
+          spenderIcon: (app.globalData.memberIcons || {})[b.spender] || '👤',
+          createdByName: b.createdByName || '未记录',
+          createdByIcon: b.createdByIcon || '👤',
+          tagClass: 'tag-' + (tagClassMap[b.category] || 'other')
+        }))
+        .sort((a, b) => this.getBillSortTime(b) - this.getBillSortTime(a))
 
       // 计算总金额
       const totalAmount = bills.reduce((sum, b) => sum + b.amount, 0)
@@ -140,6 +142,11 @@ Page({
     const M = d.getMonth() + 1
     const D = d.getDate()
     return M + '月' + D + '日'
+  },
+
+  getBillSortTime(bill) {
+    const sortDate = bill.recordCreatedAt || bill.createdAt
+    return sortDate ? new Date(sortDate).getTime() : 0
   },
 
   goAdd() {

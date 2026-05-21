@@ -208,7 +208,8 @@ Page({
         createdByOpenid: currentUser.openid,
         createdByName: currentUser.memberName,
         createdByIcon: currentUser.icon,
-        createdAt: billData.createdAt
+        createdAt: billData.createdAt,
+        recordCreatedAt: new Date()
       }
 
       const addRes = await db.collection('bills').add({
