@@ -14,7 +14,8 @@ Page({
     selectedDate: '',
     displayDate: '',
     note: '',
-    submitting: false
+    submitting: false,
+    originalBill: null
   },
 
   onLoad(options = {}) {
@@ -94,7 +95,8 @@ Page({
       spender: bill.spender || '',
       note: bill.note || '',
       selectedDate,
-      displayDate: this.formatDisplayDate(selectedDate)
+      displayDate: this.formatDisplayDate(selectedDate),
+      originalBill: bill
     })
   },
 
@@ -184,33 +186,15 @@ Page({
       }
 
       if (isEdit) {
-        const updateRes = await wx.cloud.callFunction({
-          name: 'updateBill',
-          data: {
-            billId,
-            billData,
-            operatorName: currentUser.memberName,
-            operatorIcon: currentUser.icon
-          }
-        })
-        const result = updateRes.result || {}
-        if (!result.success) {
-          throw new Error(result.message || '修改失败')
-        }
+        const editedData = this.buildEditedBillData(billData, currentUser)
+        await this.replaceEditedBill(billId, editedData, currentUser)
 
         wx.showToast({ title: '已保存', icon: 'success' })
         setTimeout(() => wx.navigateBack(), 800)
         return
       }
 
-      const createData = {
-        ...billData,
-        createdByOpenid: currentUser.openid,
-        createdByName: currentUser.memberName,
-        createdByIcon: currentUser.icon,
-        createdAt: billData.createdAt,
-        recordCreatedAt: new Date()
-      }
+      const createData = this.buildNewBillData(billData, currentUser)
 
       const addRes = await db.collection('bills').add({
         data: createData
@@ -234,6 +218,79 @@ Page({
       wx.showToast({ title: '提交失败，请重试', icon: 'none' })
     } finally {
       this.setData({ submitting: false })
+    }
+  },
+
+  buildNewBillData(billData, currentUser) {
+    return {
+      ...billData,
+      createdByOpenid: currentUser.openid,
+      createdByName: currentUser.memberName,
+      createdByIcon: currentUser.icon,
+      createdAt: billData.createdAt,
+      recordCreatedAt: new Date()
+    }
+  },
+
+  buildEditedBillData(billData, currentUser) {
+    const originalBill = this.data.originalBill || {}
+
+    return {
+      ...billData,
+      createdByOpenid: originalBill.createdByOpenid || currentUser.openid,
+      createdByName: originalBill.createdByName || currentUser.memberName,
+      createdByIcon: originalBill.createdByIcon || currentUser.icon,
+      createdAt: billData.createdAt,
+      recordCreatedAt: originalBill.recordCreatedAt || new Date(),
+      updatedAt: new Date(),
+      updatedByOpenid: currentUser.openid,
+      updatedByName: currentUser.memberName,
+      updatedByIcon: currentUser.icon
+    }
+  },
+
+  async replaceEditedBill(billId, editedData, currentUser) {
+    let newBillId = ''
+
+    try {
+      const addRes = await db.collection('bills').add({
+        data: editedData
+      })
+      newBillId = addRes._id
+
+      const deleteRes = await wx.cloud.callFunction({
+        name: 'deleteBill',
+        data: {
+          billId,
+          operatorName: currentUser.memberName,
+          operatorIcon: currentUser.icon
+        }
+      })
+      const result = deleteRes.result || {}
+      if (!result.success) {
+        throw new Error(result.message || '删除旧账单失败')
+      }
+
+      app.addOperationLog({
+        action: 'update',
+        billId: newBillId,
+        originalBillId: billId,
+        beforeSnapshot: this.data.originalBill || null,
+        afterSnapshot: editedData,
+        operatorOpenid: currentUser.openid,
+        operatorName: currentUser.memberName,
+        operatorIcon: currentUser.icon,
+        createdAt: new Date()
+      })
+    } catch (err) {
+      if (newBillId) {
+        try {
+          await db.collection('bills').doc(newBillId).remove()
+        } catch (rollbackErr) {
+          console.warn('回滚修改账单失败', rollbackErr)
+        }
+      }
+      throw err
     }
   },
 
