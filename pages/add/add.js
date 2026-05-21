@@ -8,7 +8,7 @@ Page({
     isEdit: false,
     amount: '',
     category: '',       // 当前选中的类别
-    categories: ['餐饮', '交通', '生活', '娱乐', '医疗', '教育', '其他'],
+    categories: ['餐饮', '交通', '电话费', '生活', '娱乐', '医疗', '教育', '其他'],
     spender: '',
     familyMembers: [],
     selectedDate: '',

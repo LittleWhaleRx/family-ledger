@@ -52,7 +52,7 @@ Page({
 
       // 中文类别 -> 英文CSS类名映射
       const tagClassMap = {
-        '餐饮': 'food', '交通': 'transport', '生活': 'life',
+        '餐饮': 'food', '交通': 'transport', '电话费': 'phone', '生活': 'life',
         '娱乐': 'entertain', '医疗': 'medical',
         '教育': 'education', '其他': 'other'
       }

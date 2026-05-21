@@ -187,6 +187,7 @@
 /* 各类别标签颜色 */
 .tag-food { background: #fff0e6; color: #e67e22; }
 .tag-transport { background: #e8f4fd; color: #2980b9; }
+.tag-phone { background: #e9f7fb; color: #16a085; }
 .tag-life { background: #e8f8f0; color: #27ae60; }
 .tag-entertain { background: #f3e8fd; color: #8e44ad; }
 .tag-medical { background: #fde8e8; color: #e74c3c; }
