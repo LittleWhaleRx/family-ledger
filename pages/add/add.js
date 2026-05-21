@@ -241,7 +241,7 @@ Page({
       createdByName: originalBill.createdByName || currentUser.memberName,
       createdByIcon: originalBill.createdByIcon || currentUser.icon,
       createdAt: billData.createdAt,
-      recordCreatedAt: originalBill.recordCreatedAt || new Date(),
+      recordCreatedAt: originalBill.recordCreatedAt || originalBill.createdAt || new Date(),
       updatedAt: new Date(),
       updatedByOpenid: currentUser.openid,
       updatedByName: currentUser.memberName,
