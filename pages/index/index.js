@@ -13,12 +13,18 @@ Page({
     touchStartY: 0,
     currentUser: null,
     operatorOptions: [],
-    showIdentityModal: false
+    showIdentityModal: false,
+    showUndoTip: false,
+    undoBillSnapshot: null
   },
 
   async onShow() {
     await this.initCurrentUser()
     this.loadData()
+  },
+
+  onUnload() {
+    this.clearUndoTimer()
   },
 
   onPullDownRefresh() {
@@ -194,6 +200,7 @@ Page({
   deleteBill(e) {
     const { id, note, amount } = e.currentTarget.dataset
     if (!id) return
+    const billSnapshot = this.data.bills.find(item => item._id === id)
 
     wx.showModal({
       title: '删除账单',
@@ -221,8 +228,10 @@ Page({
           if (!result.success) {
             throw new Error(result.message || '删除失败')
           }
-          wx.showToast({ title: '已删除', icon: 'success' })
           this.setData({ swipedBillId: '' })
+          if (billSnapshot) {
+            this.showUndoTip(billSnapshot)
+          }
           this.loadData()
         } catch (err) {
           console.error('删除失败', err)
@@ -232,5 +241,75 @@ Page({
         }
       }
     })
+  },
+
+  showUndoTip(billSnapshot) {
+    this.clearUndoTimer()
+    this.setData({
+      showUndoTip: true,
+      undoBillSnapshot: billSnapshot
+    })
+    this.undoTimer = setTimeout(() => {
+      this.setData({
+        showUndoTip: false,
+        undoBillSnapshot: null
+      })
+      this.undoTimer = null
+    }, 3000)
+  },
+
+  clearUndoTimer() {
+    if (this.undoTimer) {
+      clearTimeout(this.undoTimer)
+      this.undoTimer = null
+    }
+  },
+
+  buildRestoreData(bill) {
+    const restoreData = { ...bill }
+    delete restoreData._id
+    delete restoreData._openid
+    delete restoreData.dateStr
+    delete restoreData.tagClass
+    delete restoreData.spenderIcon
+    return restoreData
+  },
+
+  async restoreDeletedBill() {
+    const billSnapshot = this.data.undoBillSnapshot
+    if (!billSnapshot) return
+
+    this.clearUndoTimer()
+    this.setData({
+      showUndoTip: false,
+      undoBillSnapshot: null
+    })
+
+    wx.showLoading({ title: '恢复中...' })
+    try {
+      const currentUser = await app.loadCurrentUser()
+      const restoreData = this.buildRestoreData(billSnapshot)
+      const addRes = await db.collection('bills').add({
+        data: restoreData
+      })
+
+      app.addOperationLog({
+        action: 'restore',
+        billId: addRes._id,
+        billSnapshot: restoreData,
+        operatorOpenid: currentUser ? currentUser.openid : '',
+        operatorName: currentUser ? currentUser.memberName : '未绑定',
+        operatorIcon: currentUser ? currentUser.icon : '👤',
+        createdAt: new Date()
+      })
+
+      wx.showToast({ title: '已恢复', icon: 'success' })
+      this.loadData()
+    } catch (err) {
+      console.error('恢复失败', err)
+      wx.showToast({ title: '恢复失败，请重试', icon: 'none' })
+    } finally {
+      wx.hideLoading()
+    }
   }
 })

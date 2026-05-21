@@ -63,6 +63,11 @@
     <button class="btn-bottom btn-add" bindtap="goAdd">+ 记一笔</button>
   </view>
 
+  <view class="undo-tip" wx:if="{{showUndoTip}}" catchtap="restoreDeletedBill">
+    <text class="undo-text">已删除一笔账单</text>
+    <text class="undo-action">恢复</text>
+  </view>
+
   <view class="identity-mask" wx:if="{{showIdentityModal}}">
     <view class="identity-panel">
       <text class="identity-title">选择使用者</text>
