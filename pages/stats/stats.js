@@ -7,8 +7,7 @@ const _ = db.command
 const CAT_COLORS = {
   '餐饮': '#e67e22',
   '交通': '#2980b9',
-  '购物': '#c0392b',
-  '住房': '#27ae60',
+  '生活': '#27ae60',
   '娱乐': '#8e44ad',
   '医疗': '#e74c3c',
   '教育': '#2c3e50',
@@ -78,7 +77,10 @@ Page({
         .limit(1000)
         .get()
 
-      const bills = res.data
+      const bills = res.data.map(b => ({
+        ...b,
+        category: app.normalizeCategory(b.category)
+      }))
       const annualStats = this.buildAnnualStats(annualRes.data)
       const totalAmount = bills.reduce((s, b) => s + b.amount, 0)
 

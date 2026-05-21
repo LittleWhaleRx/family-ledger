@@ -52,13 +52,14 @@ Page({
 
       // 中文类别 -> 英文CSS类名映射
       const tagClassMap = {
-        '餐饮': 'food', '交通': 'transport', '购物': 'shopping',
-        '住房': 'housing', '娱乐': 'entertain', '医疗': 'medical',
+        '餐饮': 'food', '交通': 'transport', '生活': 'life',
+        '娱乐': 'entertain', '医疗': 'medical',
         '教育': 'education', '其他': 'other'
       }
       const bills = res.data
         .map(b => ({
           ...b,
+          category: app.normalizeCategory(b.category),
           spender: b.spender || '未填写',
           dateStr: this.formatDate(b.createdAt),
           spenderIcon: (app.globalData.memberIcons || {})[b.spender] || '👤',

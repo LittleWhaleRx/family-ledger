@@ -8,7 +8,7 @@ Page({
     isEdit: false,
     amount: '',
     category: '',       // 当前选中的类别
-    categories: ['餐饮', '交通', '购物', '住房', '娱乐', '医疗', '教育', '其他'],
+    categories: ['餐饮', '交通', '生活', '娱乐', '医疗', '教育', '其他'],
     spender: '',
     familyMembers: [],
     selectedDate: '',
@@ -91,7 +91,7 @@ Page({
 
     this.setData({
       amount: bill.amount ? String(bill.amount) : '',
-      category: bill.category || '',
+      category: app.normalizeCategory(bill.category),
       spender: bill.spender || '',
       note: bill.note || '',
       selectedDate,
@@ -112,15 +112,17 @@ Page({
     }).then(res => {
       const cat = res.result.category
       if (cat && cat !== '其他') {
-        this.setData({ category: cat })
-        wx.showToast({ title: '已自动识别: ' + cat, icon: 'none', duration: 1500 })
+        const category = app.normalizeCategory(cat)
+        this.setData({ category })
+        wx.showToast({ title: '已自动识别: ' + category, icon: 'none', duration: 1500 })
       }
     }).catch(() => {
       // 云函数还没部署，用本地规则兜底
       const cat = this.localAutoCategory(note)
       if (cat && cat !== '其他') {
-        this.setData({ category: cat })
-        wx.showToast({ title: '已自动识别: ' + cat, icon: 'none', duration: 1500 })
+        const category = app.normalizeCategory(cat)
+        this.setData({ category })
+        wx.showToast({ title: '已自动识别: ' + category, icon: 'none', duration: 1500 })
       }
     })
   },
@@ -143,7 +145,7 @@ Page({
         bestCat = cat
       }
     }
-    return bestCat
+    return app.normalizeCategory(bestCat)
   },
 
   async submitBill() {
@@ -179,7 +181,7 @@ Page({
 
       const billData = {
         amount: parseFloat(amount),
-        category,
+        category: app.normalizeCategory(category),
         spender,
         note: note.trim(),
         createdAt: this.buildBillDate(selectedDate)
