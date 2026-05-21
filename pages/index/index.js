@@ -177,6 +177,10 @@ Page({
     if (deltaX < -45) {
       this.setData({ swipedBillId: id })
     } else if (deltaX > 45) {
+      if (this.data.swipedBillId) {
+        this.setData({ swipedBillId: '' })
+        return
+      }
       this.editBill(id)
     }
   },
