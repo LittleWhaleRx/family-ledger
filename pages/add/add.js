@@ -4,25 +4,41 @@ const db = wx.cloud.database()
 
 Page({
   data: {
+    billId: '',
+    isEdit: false,
     amount: '',
     category: '',       // 当前选中的类别
     categories: ['餐饮', '交通', '购物', '住房', '娱乐', '医疗', '教育', '其他'],
     spender: '',
     familyMembers: [],
+    selectedDate: '',
+    displayDate: '',
     note: '',
     submitting: false
   },
 
-  onLoad() {
+  onLoad(options = {}) {
     const memberIcons = app.globalData.memberIcons || {}
     const familyMembers = (app.globalData.familyMembers || []).map(name => ({
       name,
       icon: memberIcons[name] || '👤'
     }))
-    this.setData({ familyMembers })
+    const today = this.formatInputDate(new Date())
+    this.setData({
+      billId: options.id || '',
+      isEdit: !!options.id,
+      familyMembers,
+      selectedDate: today,
+      displayDate: this.formatDisplayDate(today)
+    })
     app.loadCurrentUser().catch(err => {
       console.error('获取使用者失败', err)
     })
+
+    if (options.id) {
+      wx.setNavigationBarTitle({ title: '修改账单' })
+      this.loadBill(options.id)
+    }
   },
 
   onAmountInput(e) {
@@ -39,6 +55,47 @@ Page({
 
   onNoteInput(e) {
     this.setData({ note: e.detail.value })
+  },
+
+  onDateChange(e) {
+    const selectedDate = e.detail.value
+    this.setData({
+      selectedDate,
+      displayDate: this.formatDisplayDate(selectedDate)
+    })
+  },
+
+  async loadBill(id) {
+    wx.showLoading({ title: '加载中...' })
+    try {
+      const cachedBill = wx.getStorageSync('familyLedgerEditingBill')
+      if (cachedBill && cachedBill._id === id) {
+        this.fillBillForm(cachedBill)
+        wx.removeStorageSync('familyLedgerEditingBill')
+        return
+      }
+
+      const res = await db.collection('bills').doc(id).get()
+      this.fillBillForm(res.data || {})
+    } catch (err) {
+      console.error('加载账单失败', err)
+      wx.showToast({ title: '加载账单失败', icon: 'none' })
+    } finally {
+      wx.hideLoading()
+    }
+  },
+
+  fillBillForm(bill) {
+    const selectedDate = this.formatInputDate(bill.createdAt ? new Date(bill.createdAt) : new Date())
+
+    this.setData({
+      amount: bill.amount ? String(bill.amount) : '',
+      category: bill.category || '',
+      spender: bill.spender || '',
+      note: bill.note || '',
+      selectedDate,
+      displayDate: this.formatDisplayDate(selectedDate)
+    })
   },
 
   // 备注输入框失去焦点时自动识别类别
@@ -88,7 +145,7 @@ Page({
   },
 
   async submitBill() {
-    const { amount, category, spender, note } = this.data
+    const { billId, isEdit, amount, category, spender, note, selectedDate } = this.data
 
     // 表单校验
     if (!amount || parseFloat(amount) <= 0) {
@@ -101,6 +158,10 @@ Page({
     }
     if (!spender) {
       wx.showToast({ title: '请选择谁花的', icon: 'none' })
+      return
+    }
+    if (!selectedDate) {
+      wx.showToast({ title: '请选择日期', icon: 'none' })
       return
     }
 
@@ -119,20 +180,45 @@ Page({
         category,
         spender,
         note: note.trim(),
+        createdAt: this.buildBillDate(selectedDate)
+      }
+
+      if (isEdit) {
+        const updateRes = await wx.cloud.callFunction({
+          name: 'updateBill',
+          data: {
+            billId,
+            billData,
+            operatorName: currentUser.memberName,
+            operatorIcon: currentUser.icon
+          }
+        })
+        const result = updateRes.result || {}
+        if (!result.success) {
+          throw new Error(result.message || '修改失败')
+        }
+
+        wx.showToast({ title: '已保存', icon: 'success' })
+        setTimeout(() => wx.navigateBack(), 800)
+        return
+      }
+
+      const createData = {
+        ...billData,
         createdByOpenid: currentUser.openid,
         createdByName: currentUser.memberName,
         createdByIcon: currentUser.icon,
-        createdAt: new Date()
+        createdAt: billData.createdAt
       }
 
       const addRes = await db.collection('bills').add({
-        data: billData
+        data: createData
       })
 
       app.addOperationLog({
         action: 'add',
         billId: addRes._id,
-        billSnapshot: billData,
+        billSnapshot: createData,
         operatorOpenid: currentUser.openid,
         operatorName: currentUser.memberName,
         operatorIcon: currentUser.icon,
@@ -148,5 +234,24 @@ Page({
     } finally {
       this.setData({ submitting: false })
     }
+  },
+
+  formatInputDate(date) {
+    const d = new Date(date)
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  },
+
+  formatDisplayDate(dateStr) {
+    if (!dateStr) return ''
+    const [year, month, day] = dateStr.split('-')
+    return `${year}年${Number(month)}月${Number(day)}日`
+  },
+
+  buildBillDate(dateStr) {
+    const [year, month, day] = dateStr.split('-').map(Number)
+    return new Date(year, month - 1, day, 12, 0, 0)
   }
 })

@@ -144,6 +144,16 @@ Page({
     wx.navigateTo({ url: '/pages/stats/stats' })
   },
 
+  editBill(id) {
+    if (!id) return
+    const bill = this.data.bills.find(item => item._id === id)
+    if (bill) {
+      wx.setStorageSync('familyLedgerEditingBill', bill)
+    }
+    this.setData({ swipedBillId: '' })
+    wx.navigateTo({ url: `/pages/add/add?id=${id}` })
+  },
+
   onBillTouchStart(e) {
     const touch = e.touches && e.touches[0]
     if (!touch) return
@@ -166,8 +176,8 @@ Page({
 
     if (deltaX < -45) {
       this.setData({ swipedBillId: id })
-    } else if (deltaX > 30) {
-      this.setData({ swipedBillId: '' })
+    } else if (deltaX > 45) {
+      this.editBill(id)
     }
   },
 

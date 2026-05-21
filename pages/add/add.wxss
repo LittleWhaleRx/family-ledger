@@ -54,6 +54,23 @@
   font-weight: normal;
 }
 
+/* 日期选择 */
+.date-picker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22rpx 24rpx;
+  background: #f9f9f9;
+  border-radius: 12rpx;
+  color: #333;
+  font-size: 30rpx;
+}
+
+.date-arrow {
+  color: #aaa;
+  font-size: 36rpx;
+}
+
 /* 类别网格 */
 .category-grid {
   display: flex;

@@ -50,7 +50,7 @@
       </view>
     </view>
     <view class="delete-hint" wx:if="{{bills.length > 0}}">
-      <text>向左滑动账单可删除</text>
+      <text>向左滑动删除，向右滑动修改</text>
     </view>
     <view wx:if="{{bills.length === 0}}" class="empty-tip">
       <text>还没有账单，快去记一笔吧~</text>
